@@ -217,10 +217,12 @@ def generate_launch_description():
                 name='mission_orchestrator',
                 output='screen',
                 parameters=[{
-                    'dock_x': 0.7575,
-                    'dock_y': 0.50,
+                    'dock_x': -0.2425,
+                    'dock_y': 4.00,
                     'dock_yaw': 0.0,
                     'max_dock_distance': 0.50,
+                    'target_drop_x': -1.0,
+                    'target_drop_y': 4.0,
                 }],
             ),
         ]

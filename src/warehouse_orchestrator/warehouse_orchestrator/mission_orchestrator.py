@@ -30,12 +30,12 @@ class MissionOrchestratorNode(Node):
         self.get_logger().info("   STARTING WAREHOUSE MISSION ORCHESTRATOR NODE   ")
         self.get_logger().info("==================================================")
 
-        self.declare_parameter('dock_x', 0.7575)
-        self.declare_parameter('dock_y', 0.50)
+        self.declare_parameter('dock_x', -0.2425)
+        self.declare_parameter('dock_y', 4.00)
         self.declare_parameter('dock_yaw', 0.0)
         self.declare_parameter('max_dock_distance', 0.50)
-        self.declare_parameter('target_drop_x', 0.0)
-        self.declare_parameter('target_drop_y', 0.5)
+        self.declare_parameter('target_drop_x', -1.0)
+        self.declare_parameter('target_drop_y', 4.0)
 
         self.dock_x = float(self.get_parameter('dock_x').value)
         self.dock_y = float(self.get_parameter('dock_y').value)

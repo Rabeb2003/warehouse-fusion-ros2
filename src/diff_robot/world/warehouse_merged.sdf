@@ -60,7 +60,7 @@
     <!-- Robot Support Pedestal (Robot sits on top at Z = 0.4) -->
     <model name="robot_pedestal">
       <static>true</static>
-      <pose>0.0 0.0 0.2 0 0 0</pose>
+      <pose>-1.0 3.5 0.2 0 0 0</pose>
       <link name="link">
         <collision name="col">
           <geometry><box><size>0.4 0.4 0.4</size></box></geometry>
@@ -78,7 +78,7 @@
     <!-- Pick Table in front of Panda arm -->
     <model name="pick_table">
       <static>true</static>
-      <pose>0.5 0.0 0.2 0 0 0</pose>
+      <pose>-0.5 3.5 0.2 0 0 0</pose>
       <link name="link">
         <collision name="col">
           <geometry><box><size>0.5 0.6 0.4</size></box></geometry>
@@ -96,7 +96,7 @@
     <!-- Target Red Cube to Pick Up -->
     <model name="target_block">
       <static>false</static>
-      <pose>0.5 0.0 0.425 0 0 0</pose>
+      <pose>-0.5 3.5 0.425 0 0 0</pose>
       <link name="link">
         <inertial>
           <mass>0.05</mass>
@@ -127,7 +127,7 @@
     <!-- Place Platform on the left (+Y side) -->
     <model name="place_table">
       <static>true</static>
-      <pose>0.0 0.5 0.2 0 0 0</pose>
+      <pose>-1.0 4.0 0.2 0 0 0</pose>
       <link name="link">
         <collision name="col">
           <geometry><box><size>0.4 0.4 0.4</size></box></geometry>
