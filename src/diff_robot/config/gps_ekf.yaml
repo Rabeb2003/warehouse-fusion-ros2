@@ -1,0 +1,82 @@
+### EKF locale : odom -> base_footprint
+# Fusionne uniquement odométrie roues + IMU. Continue dans le temps
+# (REP 105) : ne doit JAMAIS recevoir de correction GPS directement.
+ekf_filter_node_odom:
+  ros__parameters:
+    frequency: 30.0
+    two_d_mode: true
+    publish_tf: true
+    map_frame: map
+    odom_frame: odom
+    base_link_frame: base_footprint
+    world_frame: odom
+
+    odom0: odom
+    odom0_config: [false, false, false,
+                   false, false, false,
+                   true,  true,  false,
+                   false, false, true,
+                   false, false, false]
+
+    imu0: imu
+    imu0_config: [false, false, false,
+                  false, false, true,
+                  false, false, false,
+                  false, false, false,
+                  false, false, false]
+
+### EKF globale : map -> odom
+# Corrige la dérive long-terme grâce au GPS (odometry/gps).
+# C'est la SEULE EKF qui doit ingérer la sortie du navsat_transform_node.
+ekf_filter_node_map:
+  ros__parameters:
+    frequency: 30.0
+    two_d_mode: true
+    publish_tf: true
+    map_frame: map
+    odom_frame: odom
+    base_link_frame: base_footprint
+    world_frame: map
+
+    odom0: odom
+    odom0_config: [false, false, false,
+                   false, false, false,
+                   true,  true,  false,
+                   false, false, true,
+                   false, false, false]
+
+    imu0: imu
+    imu0_config: [false, false, false,
+                  false, false, true,
+                  false, false, false,
+                  false, false, false,
+                  false, false, false]
+
+    odom1: odometry/gps
+    odom1_config: [true,  true,  false,
+                   false, false, false,
+                   false, false, false,
+                   false, false, false,
+                   false, false, false]
+
+### navsat_transform_node
+navsat_transform:
+  ros__parameters:
+    frequency: 30.0
+    delay: 3.0
+    magnetic_declination_radians: 0.0
+    yaw_offset: 0.0
+    zero_altitude: true
+
+    # Nom de paramètre correct pour votre version de robot_localization
+    # (broadcast_utm_transform déprécié → broadcast_cartesian_transform)
+    broadcast_cartesian_transform: true
+
+    publish_filtered_gps: true
+    use_odometry_yaw: true
+
+    # wait_for_datum + datum fixe explicite : évite de dépendre de la
+    # qualité du tout premier fix GPS bruité pour définir l'origine
+    # (cause n°1 identifiée du saut de position au spawn)
+    wait_for_datum: true
+    datum: [49.0, 3.0, 0.0]

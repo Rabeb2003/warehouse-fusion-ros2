@@ -1,0 +1,59 @@
+<!--
+  Behavior Tree personnalisé pour Robot Différentiel + Remorque
+  ==============================================================
+  Optimisé pour éviter les blocages de collision:
+
+  Architecture:
+    NavigateRecovery (6 retries) →
+      PipelineSequence:
+        1. RateController → ComputePathToPose (replan every 2.0Hz)
+        2. FollowPath
+
+      Si échec → RecoveryFallback:
+        1. ClearEntireCostmap (local + global) — Élimine les données obstacle périmées
+        2. Wait 1.0s — Laisse le LiDAR remplir les costmaps avec données fraîches
+        3. ComputePathToPose (replan with fresh costmap)
+        4. FollowPath (retry the new path)
+        Si encore échec:
+        5. BackUp 0.4m — Crée de l'espace pour manœuvrer
+        6. Spin 90° — Réoriente le robot pour trouver un meilleur chemin
+-->
+<root main_tree_to_execute="MainTree">
+  <BehaviorTree ID="MainTree">
+    <RecoveryNode number_of_retries="6" name="NavigateRecovery">
+      <PipelineSequence name="NavigateWithReplanning">
+        <RateController hz="2.0">
+          <ComputePathToPose goal="{goal}" path="{path}" planner_id="GridBased"/>
+        </RateController>
+        <FollowPath path="{path}" controller_id="FollowPath"/>
+      </PipelineSequence>
+      <ReactiveFallback name="RecoveryFallback">
+        <GoalUpdated/>
+        <RoundRobin name="RecoveryActions">
+          <!-- Recovery 1: Clear costmaps + Wait + Replan -->
+          <Sequence name="ClearAndReplan">
+            <ClearEntireCostmap name="ClearLocal"
+              service_name="local_costmap/clear_entirely_local_costmap"/>
+            <ClearEntireCostmap name="ClearGlobal"
+              service_name="global_costmap/clear_entirely_global_costmap"/>
+            <Wait wait_duration="1.0"/>
+          </Sequence>
+          <!-- Recovery 2: Backup to create space -->
+          <Sequence name="BackupRecovery">
+            <ClearEntireCostmap name="ClearLocalBeforeBackup"
+              service_name="local_costmap/clear_entirely_local_costmap"/>
+            <Wait wait_duration="0.5"/>
+            <BackUp backup_dist="-0.4" backup_speed="0.15"/>
+          </Sequence>
+          <!-- Recovery 3: Spin to reorient (last resort) -->
+          <Sequence name="SpinRecovery">
+            <ClearEntireCostmap name="ClearLocalBeforeSpin"
+              service_name="local_costmap/clear_entirely_local_costmap"/>
+            <Wait wait_duration="0.5"/>
+            <Spin spin_dist="1.57"/>
+          </Sequence>
+        </RoundRobin>
+      </ReactiveFallback>
+    </RecoveryNode>
+  </BehaviorTree>
+</root>

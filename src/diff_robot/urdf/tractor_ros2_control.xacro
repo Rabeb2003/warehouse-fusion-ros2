@@ -1,0 +1,97 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- ============================================================
+       Abstraction ros2_control : structure identique à Classic,
+       seul le plugin hardware change (voir <gazebo> plus bas).
+       Ne référence QUE les joints actionnés du tracteur (2 roues
+       différentielles). La jointure d'attelage vers la remorque
+       est passive et volontairement absente de ce bloc.
+       ============================================================ -->
+  <ros2_control name="TractorGazeboSimSystem" type="system">
+
+    <hardware>
+      <!-- CHANGEMENT CLÉ vs Classic : gazebo_ros2_control/GazeboSystem
+           -> gz_ros2_control/GazeboSimSystem -->
+      <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+    </hardware>
+
+    <joint name="rear_left_joint">
+      <command_interface name="velocity">
+        <param name="min">-10</param>
+        <param name="max">10</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="rear_right_joint">
+      <command_interface name="velocity">
+        <param name="min">-10</param>
+        <param name="max">10</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <!-- Passive joints (Read-only states) -->
+    <joint name="front_left_joint">
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="front_right_joint">
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="hitch_joint">
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="trailer_wheel_left_joint">
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="trailer_wheel_right_joint">
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+  </ros2_control>
+
+  <!-- ============================================================
+       Plugin Gazebo qui instancie le controller_manager et connecte
+       les interfaces ci-dessus au modèle physique simulé.
+       C'est l'équivalent Fortress du plugin gazebo_ros2_control
+       de Classic.
+       ============================================================ -->
+  <gazebo>
+    <plugin filename="ign_ros2_control-system"
+            name="ign_ros2_control::IgnitionROS2ControlPlugin">
+      <parameters>/home/rabeb/ros2_diff_drive_robot/src/diff_robot/config/diff_drive_controller.yaml</parameters>
+      <ros>
+        <namespace>/</namespace>
+        <remapping>/diff_drive_controller/cmd_vel_unstamped:=/cmd_vel</remapping>
+      </ros>
+    </plugin>
+  </gazebo>
+
+  <!-- ============================================================
+       RAPPEL : la jointure d'attelage reste ici, INCHANGÉE, en dehors
+       de <ros2_control>. Elle est purement passive : aucun actionneur,
+       aucune commande. Son angle beta est lu par beta_ekf_node.py via
+       /joint_states, pas via un command_interface.
+       ============================================================ -->
+  <!--
+  <joint name="hitch_joint" type="revolute">
+    <parent link="tractor_base_link"/>
+    <child link="trailer_tongue_link"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-1.57" upper="1.57" effort="0" velocity="0"/>
+  </joint>
+  -->
+
+</robot>

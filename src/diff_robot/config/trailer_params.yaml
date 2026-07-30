@@ -1,0 +1,46 @@
+# Trailer Parameters for Differential Drive Robot with Trailer
+# Adapted from Husky project for differential drive (not skid-steer)
+
+/**:
+  ros__parameters:
+    # Geometry parameters (must match URDF)
+    robot_length: 0.6
+    robot_width: 0.4
+    trailer_length: 0.8
+    trailer_width: 0.5
+    hitch_distance: 0.50
+    hitch_offset_x: -0.3575
+    hitch_offset_y: 0.0414
+    tractor_center_x: -0.025
+    tractor_center_y: 0.041
+    wheelbase: 0.3
+    track: 0.35
+    trailer_wheelbase: 0.80
+
+    # Kinematic limits
+    beta_limit_deg: 45.0
+    max_beta_deg: 32.0
+
+    # Velocity limits
+    max_forward_speed: 0.26
+    max_backward_speed: 0.12
+    max_reverse_speed: 0.12
+    max_stationary_omega: 1.0
+
+    # Control parameters
+    beta_filter_hz: 10.0
+    beta_lookahead_time: 0.7
+    use_inverse_kinematics: true
+    adaptive_velocity_reduction: true
+
+    # Safety node parameters
+    cmd_timeout: 0.6
+
+    # Dynamic footprint parameters
+    disk_radius: 0.12
+    footprint_margin: 0.03
+    num_circles_tractor: 3
+    num_circles_trailer: 3
+
+    # Simulation parameters
+    use_sim_time: true

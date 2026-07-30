@@ -1,0 +1,86 @@
+<?xml version="1.0" ?>
+<sdf version="1.9">
+  <world name="silverstone_track">
+
+    <!-- Origine géographique du monde : doit être IDENTIQUE au datum
+         du navsat_transform_node dans gps_ekf.yaml -->
+    <spherical_coordinates>
+      <surface_model>EARTH_WGS84</surface_model>
+      <world_frame_orientation>ENU</world_frame_orientation>
+      <latitude_deg>49.0</latitude_deg>
+      <longitude_deg>3.0</longitude_deg>
+      <elevation>0</elevation>
+      <heading_deg>0</heading_deg>
+    </spherical_coordinates>
+
+    <!-- Systèmes obligatoires gz-sim -->
+    <plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics"/>
+    <plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+    <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster"/>
+    <plugin filename="gz-sim-user-commands-system" name="gz::sim::systems::UserCommands"/>
+    <!-- NavSat system désactivé - plugin non installé -->
+
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Sun</uri>
+    </include>
+
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Ground%20Plane</uri>
+    </include>
+
+    <!-- ==================== PISTE INTERLAGOS (Géométrie originale) ==================== -->
+    <!-- Sol asphalté -->
+    <model name="asphalt_plane">
+      <static>true</static>
+      <pose>-0.719505 0.551979 0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>125 125 0.1</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>125 125 0.1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.3 0.3 0.3 1</ambient>
+            <diffuse>0.3 0.3 0.3 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Piste Interlagos simplifiée (sans mesh STL pour éviter les erreurs de chemin) -->
+    <model name="interlagos_track">
+      <static>true</static>
+      <link name="body">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>80 40 0.1</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>80 40 0.1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.4 0.4 0.4 1</ambient>
+            <diffuse>0.4 0.4 0.4 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+  </world>
+</sdf>

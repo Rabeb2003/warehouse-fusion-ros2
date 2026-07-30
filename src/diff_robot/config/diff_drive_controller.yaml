@@ -1,0 +1,32 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 100  # Hz
+
+    diff_drive_controller:
+      type: diff_drive_controller/DiffDriveController
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+joint_state_broadcaster:
+  ros__parameters:
+    use_local_topics: true
+
+diff_drive_controller:
+  ros__parameters:
+    left_wheel_names: ["rear_left_joint"]
+    right_wheel_names: ["rear_right_joint"]
+
+    wheel_separation: 0.402  # From URDF: rear_left y=+0.201, rear_right y=-0.201
+    wheel_radius: 0.085  # From URDF cylinder radius
+
+    # Ne pas publier la TF odom->base depuis ce contrôleur
+    # (l'OdometryPublisher Ignition s'en charge via le bridge /tf)
+    enable_odom_tf: false
+    publish_rate: 50.0
+
+    odom_frame_id: odom
+    base_frame_id: base_footprint
+
+    cmd_vel_timeout: 0.5
+    use_stamped_vel: false
