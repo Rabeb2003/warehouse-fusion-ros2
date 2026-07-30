@@ -1,0 +1,6 @@
+build/
+install/
+log/
+.command_history/
+__pycache__/
+*.pyc

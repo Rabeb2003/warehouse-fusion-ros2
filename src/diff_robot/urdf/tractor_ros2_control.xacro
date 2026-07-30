@@ -71,7 +71,7 @@
   <gazebo>
     <plugin filename="ign_ros2_control-system"
             name="ign_ros2_control::IgnitionROS2ControlPlugin">
-      <parameters>/home/rabeb/ros2_diff_drive_robot/src/diff_robot/config/diff_drive_controller.yaml</parameters>
+      <parameters>$(find diff_robot)/config/diff_drive_controller.yaml</parameters>
       <ros>
         <namespace>/</namespace>
         <remapping>/diff_drive_controller/cmd_vel_unstamped:=/cmd_vel</remapping>

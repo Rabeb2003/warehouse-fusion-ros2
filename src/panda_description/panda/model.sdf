@@ -785,7 +785,7 @@
       </sensor>
     </link>
     <plugin name='ign_ros2_control::IgnitionROS2ControlPlugin' filename='ign_ros2_control-system'>
-      <parameters>/home/rabeb/Downloads/panda_gz_moveit2-master/install/share/panda_moveit_config/config/controllers_position.yaml</parameters>
+      <parameters>/home/rabeb/warehouse_fusion_ws/install/panda_moveit_config/share/panda_moveit_config/config/controllers_position.yaml</parameters>
       <robot_param>robot_description</robot_param>
       <robot_param_node>panda_robot_state_publisher</robot_param_node>
     </plugin>

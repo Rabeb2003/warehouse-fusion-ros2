@@ -321,5 +321,5 @@ def generate_launch_description():
 
         LogInfo(msg='=== Robot Remorque SLAM Ignition Stack Started ==='),
         LogInfo(msg='Drive: ros2 run teleop_twist_keyboard teleop_twist_keyboard'),
-        LogInfo(msg='Save map: ros2 run nav2_map_server map_saver_cli -f /home/rabeb/ros2_diff_drive_robot/src/diff_robot/map/my_map'),
+        LogInfo(msg='Save map: ros2 run nav2_map_server map_saver_cli -f $(ros2 pkg prefix diff_robot)/share/diff_robot/map/my_map'),
     ])

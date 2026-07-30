@@ -290,6 +290,14 @@
     </inertial>
   </link>
 
+  <!-- TRAILER CART DROP POINT FRAME (Target drop position for panda arm) -->
+  <link name="trailer_cart_drop_point"/>
+  <joint name="trailer_cart_drop_joint" type="fixed">
+    <parent link="trailer_base_link"/>
+    <child link="trailer_cart_drop_point"/>
+    <origin xyz="0.4 0 0.15" rpy="0 0 0"/>
+  </joint>
+
   <!-- TRAILER WHEEL LEFT -->
   <link name="trailer_wheel_left">
     <visual>

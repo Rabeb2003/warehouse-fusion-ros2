@@ -53,6 +53,9 @@ class PickAndPlaceDemoNode(Node):
         )
         self.target_half_width = float(self.get_parameter('target_half_width').value)
 
+        self.declare_parameter('docking_required', False)
+        self.docking_required = bool(self.get_parameter('docking_required').value)
+
         # Vision subscriber for real-time detected object pose
         self.detected_object_pose = None
         self.last_detection_monotonic = None
@@ -60,6 +63,20 @@ class PickAndPlaceDemoNode(Node):
             PoseStamped,
             '/detected_object_pose',
             self.object_pose_callback,
+            10
+        )
+
+        # Trailer docking subscriber & Panda completion publisher
+        self.trailer_docked = False
+        self.docking_sub = self.create_subscription(
+            Bool,
+            '/trailer/docking_status',
+            self.docking_callback,
+            10
+        )
+        self.completion_pub = self.create_publisher(
+            Bool,
+            '/panda/task_completed',
             10
         )
 
@@ -90,6 +107,19 @@ class PickAndPlaceDemoNode(Node):
             'joint_trajectory_controller',
             'gripper_trajectory_controller',
         ]
+
+    def docking_callback(self, msg: Bool):
+        if msg.data:
+            self.get_logger().info("Received /trailer/docking_status = True: Trailer is docked!")
+            self.trailer_docked = True
+
+    def wait_for_docking(self):
+        if not self.docking_required:
+            return
+        self.get_logger().info("Waiting for /trailer/docking_status signal before executing Pick and Place...")
+        while rclpy.ok() and not self.trailer_docked:
+            rclpy.spin_once(self, timeout_sec=0.5)
+        self.get_logger().info("Trailer docking confirmed. Proceeding with Pick and Place execution.")
 
     def object_pose_callback(self, msg: PoseStamped):
         self.detected_object_pose = msg.pose
@@ -450,12 +480,14 @@ class PickAndPlaceDemoNode(Node):
         self.get_logger().info("==================================================")
         self.get_logger().info("  PICK AND PLACE TASK SUCCESSFULLY COMPLETED !   ")
         self.get_logger().info("==================================================")
+        self.completion_pub.publish(Bool(data=True))
 
 def main(args=None):
     rclpy.init(args=args)
     demo = PickAndPlaceDemoNode()
     try:
         demo.wait_for_servers()
+        demo.wait_for_docking()
         demo.run_sequence()
     except Exception as e:
         demo.get_logger().error(f"Error during Pick and Place execution: {e}")
