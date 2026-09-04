@@ -140,12 +140,22 @@ The full mission executes the following sequence:
 - Reliable object detection and grasp planning
 - End-to-end mission completion in ~3 minutes
 
-**Screenshots**: See `docs/` folder for visual demonstrations:
-- `warehouse_scene.png`: Complete warehouse simulation environment
-- `nav2_navigation.png`: Nav2 navigation stack with path planning
-- `object_detection.png`: Real-time object detection pipeline
-- `place_detection.png`: Grasp validation and placement
-- `simulation_rviz.png`: Integrated system visualization
+**Screenshots**:
+
+![Warehouse Scene](docs/warehouse_scene.png)
+*Complete warehouse simulation environment*
+
+![Nav2 Navigation](docs/nav2_navigation.png)
+*Nav2 navigation stack with path planning*
+
+![Object Detection](docs/object_detection.png)
+*Real-time object detection pipeline*
+
+![Place Detection](docs/place_detection.png)
+*Grasp validation and placement*
+
+![Simulation RViz](docs/simulation_rviz.png)
+*Integrated system visualization*
 
 **Limitations**:
 - Simulation-only validation (no hardware deployment yet)
