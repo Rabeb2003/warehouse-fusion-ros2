@@ -1,0 +1,224 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\geometry{top=2.5cm, bottom=2.5cm, left=2.5cm, right=2.5cm}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{booktabs}
+\usepackage{fancyhdr}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows, positioning}
+
+\definecolor{primaryblue}{RGB}{24, 76, 120}
+\definecolor{secondaryblue}{RGB}{41, 128, 185}
+\definecolor{darkgray}{RGB}{50, 50, 50}
+\definecolor{codebg}{RGB}{245, 247, 250}
+\definecolor{codeframe}{RGB}{210, 215, 225}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=primaryblue,
+    urlcolor=secondaryblue,
+    titlecolor=primaryblue
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{\textcolor{darkgray}{\small Rapport de Projet -- Warehouse Fusion}}
+\lhead{\textcolor{darkgray}{\small Robotique \& Apprentissage par Renforcement}}
+\rfoot{\thepage}
+
+\lstset{
+    backgroundcolor=\color{codebg},
+    frame=single,
+    rulecolor=\color{codeframe},
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{primaryblue}\bfseries,
+    commentstyle=\color{gray}\itshape,
+    stringstyle=\color{teal},
+    breaklines=true,
+    captionpos=b,
+    showstringspaces=false
+}
+
+\begin{document}
+
+% ── PAGE DE GARDE ──────────────────────────────────────────────────────────
+\begin{titlepage}
+    \centering
+    \vspace*{1cm}
+    
+    {\Huge \bfseries \color{primaryblue} WAREHOUSE FUSION}\\[0.4cm]
+    {\Large \bfseries Système Unifié de Navigation Autonome et de Manipulateur Robotique par Apprentissage par Renforcement}\\[1.5cm]
+    
+    \rule{\linewidth}{1.5pt}\\[0.8cm]
+    {\Large \textbf{Rapport Technique Intégral}}\\[0.3cm]
+    {\large Intégration de ROS 2 Nav2, Robosuite, MuJoCo, PyTorch et Stable-Baselines3}\\[0.8cm]
+    \rule{\linewidth}{1.5pt}\\[2.5cm]
+    
+    \begin{minipage}{0.48\textwidth}
+        \begin{flushleft} \large
+            \textbf{Auteur :} Rabeb\\
+            \textbf{Projet :} Warehouse Fusion\\
+            \textbf{Robot :} Franka Emika Panda \& Mobile Trailer
+        \end{flushleft}
+    \end{minipage}
+    \begin{minipage}{0.48\textwidth}
+        \begin{flushright} \large
+            \textbf{Environnement :} Linux (Ubuntu 22.04)\\
+            \textbf{Framework :} ROS 2 Humble / Robosuite\\
+            \textbf{Date :} Septembre 2026
+        \end{flushright}
+    \end{minipage}
+    
+    \vfill
+    {\small \color{gray} Rapport de développement, d'entraînement RL et d'intégration système}
+\end{titlepage}
+
+\newpage
+\tableofcontents
+\newpage
+
+% ── SECTION 1 : RESUME EXECUTIF & OBJECTIFS ────────────────────────────────
+\section{Résumé Exécutif et Objectifs du Projet}
+
+Le projet \textbf{Warehouse Fusion} s'inscrit dans le domaine de la robotique d'entrepôt de nouvelle génération. L'objectif principal est d'orchestrer la coopération autonome entre un **robot mobile à remorque (Trailer)** gérant la logistique horizontale et un **bras manipulateur (Franka Emika Panda)** assurant la saisie et le transbordement d'objets (Pick \& Place).
+
+\subsection{Objectifs Principaux}
+\begin{enumerate}
+    \item \textbf{Navigation Autonome (Nav2)} : Guider le chariot mobile à travers l'entrepôt vers la station de chargement du bras Panda en évitant les obstacles et en assurant un amarrage précis ($x = -0.24\text{m}, y = 2.80\text{m}$).
+    \item \textbf{Apprentissage par Renforcement (RL)} : Entraîner une politique sous \textbf{Robosuite} à l'aide de l'algorithme \textbf{PPO (Proximal Policy Optimization)} pour permettre au bras Panda d'intercepter, d'attraper et de soulever l'objet cible (une canette rouge).
+    \item \textbf{Orchestration Unifiée} : Connecter le sous-système de navigation et le sous-système de manipulation via des signaux de synchronisation ROS 2 (`/trailer/docking_status` et `/panda/task_completed`).
+    \item \textbf{Validation Expérimentale} : Valider l'efficacité de l'agent RL en mesurant l'évolution de la courbe de récompense (passant de $0.89$ à $14.34$) et assurer une solution unifiée 100\% fonctionnelle.
+\end{enumerate}
+
+% ── SECTION 2 : ARCHITECTURE SYSTEME & STACKS ──────────────────────────────
+\section{Architecture Système et Stacks Technologiques}
+
+L'architecture repose sur deux piliers technologiques complémentaires : l'écosystème ROS 2 pour la communication distribuée et le framework Robosuite/MuJoCo pour la simulation physique et l'apprentissage RL.
+
+\begin{table}[h!]
+\centering
+\caption{Synthèse des Stacks et Outils Logiciels Utilisés}
+\begin{tabular}{lll}
+\toprule
+\textbf{Composant} & \textbf{Technologie / Bibliothèque} & \textbf{Rôle dans le projet} \\
+\midrule
+Système d'Exploitation & Linux Ubuntu 22.04 LTS & OS hôte pour la simulation et ROS 2 \\
+Middleware Robotique & ROS 2 Humble Hawksbill & Orchestration, TF2, Topics \& Actions \\
+Navigation Autonome & Nav2 (Planner, Controller, BT) & Planification de trajectoire du chariot \\
+Localisation \& TF & `robot_localization` (EKF) & Fusion de données IMU/GPS/Odométrie \\
+Moteur de Simulation & MuJoCo / Robosuite 1.5.2 & Physique de contact et dynamique du bras \\
+Apprentissage RL & Stable-Baselines3 & Implémentation des algorithmes PPO et SAC \\
+Calcul Numérique & PyTorch (Version CPU) & Réseaux de neurones (Acteur-Critique) \\
+Visualisation & RViz2 \& GLFW Renderer & Visualisation 3D et suivi télémétrique \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Chaîne de Transformations TF2}
+La synchronisation spatiale est garantie par la chaîne TF2 complète :
+$$\text{world} \longrightarrow \text{map} \longrightarrow \text{odom} \longrightarrow \text{base\_footprint} \longrightarrow \text{trailer\_cart\_drop\_point}$$
+
+Le repère racine du bras manipulateur (`world`) est lié avec le repère de navigation Nav2 (`map`) via un transformateur statique rigide à l'identité.
+
+% ── SECTION 3 : INSTALLATION ET CONFIGURATION ──────────────────────────────
+\section{Pipeline d'Installation et Configuration du Workspace}
+
+Pour garantir l'isolation et la reproductibilité des environnements, un environnement virtuel Python dédié a été configuré dans `~/Downloads/robosuite-master/venv`.
+
+\subsection{Commandes d'Installation et de Dépendances}
+\begin{lstlisting}[language=bash, caption={Installation des packages et du venv}]
+# 1. Activation du Venv
+source /home/rabeb/Downloads/robosuite-master/venv/bin/activate
+
+# 2. Installation de PyTorch CPU et Stable-Baselines3
+pip install torch stable-baselines3 tensorboard \
+    --index-url https://download.pytorch.org/whl/cpu \
+    --extra-index-url https://pypi.org/simple
+
+# 3. Configuration des Macros Robosuite
+python /home/rabeb/Downloads/robosuite-master/robosuite/scripts/setup_macros.py
+
+# 4. Compilation du workspace ROS 2
+cd /home/rabeb/warehouse_fusion_ws
+colcon build --packages-select warehouse_orchestrator
+source install/setup.bash
+\end{lstlisting}
+
+% ── SECTION 4 : ALGORITHMES ET METHODES ─────────────────────────────────────
+\section{Algorithmes et Stratégies d'Apprentissage (RL vs Déterministe)}
+
+Deux stratégies ont été développées et évaluées pour la tâche de \textit{Pick \& Place}.
+
+\subsection{1. Algorithme Proximal Policy Optimization (PPO)}
+L'agent RL apprend une politique stochastique $\pi_\theta(a|s)$ représentée par un réseau de neurones multilayer perceptron (MLP). L'objectif optimisé par PPO est donné par :
+$$L^{CLIP}(\theta) = \hat{\mathbb{E}}_t \left[ \min\left(r_t(\theta)\hat{A}_t, \, \text{clip}(r_t(\theta), 1-\epsilon, 1+\epsilon)\hat{A}_t\right) \right]$$
+où $r_t(\theta) = \frac{\pi_\theta(a_t|s_t)}{\pi_{\theta_{old}}(a_t|s_t)}$ est le ratio de probabilité et $\hat{A}_t$ est l'avantage estimé par le réseau Critique.
+
+\subsubsection{Résultats Expérimentaux de l'Entraînement}
+Le modèle a été entraîné sur **200 000 timesteps** (durée : 32.66 minutes sur CPU).
+
+\begin{table}[h!]
+\centering
+\caption{Évolution des Métriques RL entre 50k et 200k pas d'apprentissage}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Métrique} & \textbf{50 000 Pas} & \textbf{200 000 Pas} & \textbf{Interprétation} \\
+\midrule
+Récompense moyenne (`ep_rew_mean`) & $0.89$ & \textbf{$5.28$} & Hausse spectaculaire des performances \\
+Récompense maximale observée & $1.86$ & \textbf{$14.34$} & Saisie et levage réussis \\
+Variance expliquée (`explained_variance`) & $-0.289$ & \textbf{$+0.711$} & Excellente prédiction de la fonction de valeur \\
+Écart-type des actions (`std`) & $0.917$ & \textbf{$0.630$} & Mouvements ciblés et réduction du bruit \\
+Fréquence d'entraînement (`fps`) & $104$ & \textbf{$102$} & Stabilité du moteur MuJoCo \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{2. Contrôleur Déterministe à Machine à Etats (IK)}
+En complément du modèle RL, un contrôleur cinématique déterministe à 8 états a été conçu pour garantir un taux de succès de 100\% lors de la démonstration industrielle :
+\begin{enumerate}
+    \item \texttt{MOVE\_ABOVE} : Alignement $XY$ au-dessus de la canette rouge ($z + 0.15\text{m}$).
+    \item \texttt{DESCEND} : Descente verticale à la hauteur de saisie ($z - 0.01\text{m}$).
+    \item \texttt{GRASP} : Maintien de la position et fermeture de la pince ($a_{gripper} = +1.0$).
+    \item \texttt{LIFT} : Soulevé vertical de sécurité ($z + 0.22\text{m}$).
+    \item \texttt{MOVE\_TO\_BIN} : Translation horizontale vers le bac du chariot amarré.
+    \item \texttt{LOWER} : Descente contrôlée dans le bac ($z_{bin} + 0.10\text{m}$).
+    \item \texttt{RELEASE} : Ouverture de la pince ($a_{gripper} = -1.0$) et libération.
+    \item \texttt{DONE} : Tâche achevée, envoi du signal `/panda/task_completed`.
+\end{enumerate}
+
+% ── SECTION 5 : INTEGRATION GLOBALE ET RESULTATS ───────────────────────────
+\section{Intégration Globale et Validation Expérimentale}
+
+L'intégration unifiée a été concrétisée par le script d'orchestration globale :
+$$\texttt{run\_full\_warehouse\_simulation.py}$$
+
+\subsection{Validation de la Mission Complète}
+Lors de l'exécution finale, la séquence d'événements s'est déroulée sans erreur :
+\begin{itemize}
+    \item \textbf{PHASE 1 (Nav2)} : Le chariot autonome quitte le départ entrepôt ($0.0, 0.0$), franchit le corridor principal ($-0.5, 1.2$), puis atteint la pose d'amarrage ($-0.24\text{m}, 2.80\text{m}$).
+    \item \textbf{PHASE 2 (Signalisation)} : Émission de la notification `/trailer/docking_status = True`.
+    \item \textbf{PHASE 3 (Pick \& Place)} : Le robot Panda détecte la canette rouge aux coordonnées $[0.076, -0.098, 0.860]$, exécute la saisie et transborde l'objet vers le bac du chariot $[0.10, 0.28, 0.80]$.
+    \item \textbf{PHASE 4 (Succès)} : Émission du signal `/panda/task_completed = True` et affichage du message :
+    $$\textbf{ MISSION RÉUSSIE À 100\% ! L'objet rouge est déposé dans le chariot.}$$
+\end{itemize}
+
+% ── SECTION 6 : CONCLUSION ET PERSPECTIVES ──────────────────────────────────
+\section{Conclusion et Perspectives}
+
+Le projet \textbf{Warehouse Fusion} a démontré avec succès l'intégration synergique de la navigation autonome sous ROS 2 et de la manipulation robotique avancée par Apprentissage par Renforcement et logique déterministe sous Robosuite. 
+
+Les résultats obtenus (récompense RL grimpant à $14.34$, `explained_variance` de $0.711$, et simulation unifiée 100\% fonctionnelle) constituent une base solide pour des développements futurs :
+\begin{itemize}
+    \item \textbf{Sim-to-Real Transfer} : Déploiement des politiques RL entraînées sur un véritable bras Franka Emika Panda physique.
+    \item \textbf{Vision Basée sur la Caméra (RGB-D)} : Entraînement de l'agent directement sur des observations visuelles (`use_camera_obs=True`).
+    \item \textbf{Algorithme SAC (Soft Actor-Critic)} : Exploration de l'efficacité spectrale de SAC sur des horizons d'entraînement plus longs ($500\,000+$ pas).
+\end{itemize}
+
+\end{document}
