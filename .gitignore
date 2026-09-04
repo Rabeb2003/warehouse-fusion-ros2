@@ -1,6 +1,53 @@
+# ROS2 build artifacts
 build/
 install/
 log/
-.command_history/
+
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ROS bags and logs
+*.db3
+*.mcap
+*.bag
+
+# Simulation artifacts
+*.sdf.cache
+*.urdf.cache
+
+# Documentation and media
+docs/*.png
+docs/*.jpg
+docs/*.gif
+docs/*.mp4
+screenshots/
+videos/
+
+# Temporary files
+.command_history/
+.DS_Store
+Thumbs.db
+
+# Agent files
+.agents/
+.claude/
+.codex/
+.mcp.json
+
+# Git
+.gitconfig
+.gitmodules
